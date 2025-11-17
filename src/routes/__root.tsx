@@ -4,9 +4,11 @@ import {
   Link,
   Scripts,
   createRootRoute,
+  createRootRouteWithContext,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import * as React from "react";
+import type { QueryClient } from "@tanstack/react-query";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { Header } from "~/components/header";
 import { NotFound } from "~/components/NotFound";
@@ -14,7 +16,9 @@ import { getUserID } from "~/lib/auth-server";
 import appCss from "~/styles/app.css?url";
 import { seo } from "~/utils/seo";
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+}>()({
   head: () => ({
     meta: [
       {
@@ -62,6 +66,10 @@ export const Route = createRootRoute({
   errorComponent: DefaultCatchBoundary,
   notFoundComponent: () => <NotFound />,
   shellComponent: RootDocument,
+  beforeLoad: async () => {
+    const userID = await getUserID();
+    return { userID };
+  },
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {

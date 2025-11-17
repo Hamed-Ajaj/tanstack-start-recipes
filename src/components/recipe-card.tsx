@@ -22,7 +22,7 @@ export default function RecipeCard({
   onDelete,
   onTogglePrivacy,
 }: RecipeCardProps) {
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
   const isAuthor = session?.user.id === recipe.authorId;
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -60,7 +60,7 @@ export default function RecipeCard({
             </div>
           </div>
 
-          {isAuthor && (
+          {isAuthor && !isPending && (
             <div className="relative h-8 w-8">
               <Avatar className="h-8 w-8">
                 <AvatarImage

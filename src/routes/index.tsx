@@ -4,24 +4,31 @@ import { getUserID } from "~/lib/auth-server";
 import { getRecipes } from "~/utils/server-actions/recipe";
 import RecipeCard from "~/components/recipe-card";
 import { Suspense } from "react";
+import {
+  queryOptions,
+  useQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+
+const getRecipesQueryOptions = () =>
+  queryOptions({
+    queryKey: ["recipes"],
+    queryFn: getRecipes,
+    // staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
 export const Route = createFileRoute("/")({
   component: Home,
-  beforeLoad: async () => {
-    const userID = await getUserID();
-    return { userID };
+  loader: ({ context }) => {
+    context.queryClient.prefetchQuery(getRecipesQueryOptions());
   },
-  pendingComponent: () => <div>Loading recipes...</div>,
-  loader: async () => {
-    return {
-      recipes: getRecipes(),
-    };
-  },
-  // staleTime: 1000 * 60 * 5, // 5 minutes
 });
 
 function Home() {
-  const { recipes } = Route.useLoaderData();
+  const { data: recipes, isLoading } = useQuery(getRecipesQueryOptions());
+  if (isLoading) {
+    return <div>Loading recipes...</div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col max-w-7xl mx-auto">
@@ -33,15 +40,9 @@ function Home() {
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Suspense fallback={<div>Loading...</div>}>
-            <Await promise={recipes}>
-              {(recipeData) =>
-                recipeData?.map((recip) => (
-                  <RecipeCard key={recip.id} recipe={recip} />
-                ))
-              }
-            </Await>
-          </Suspense>
+          {recipes.map((recipe) => (
+            <RecipeCard key={recipe.id} recipe={recipe} />
+          ))}
         </div>
       </main>
     </div>

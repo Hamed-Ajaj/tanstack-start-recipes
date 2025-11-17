@@ -3,6 +3,7 @@ import {
   Link,
   redirect,
   useNavigate,
+  useRouter,
 } from "@tanstack/react-router";
 
 import type React from "react";
@@ -31,12 +32,6 @@ import { useFormField } from "~/hooks/useFormField";
 
 export const Route = createFileRoute("/add-recipe/")({
   component: RouteComponent,
-  beforeLoad: async () => {
-    const userID = await getUserID();
-    return {
-      userID,
-    };
-  },
   pendingComponent: () => <div>Loading...</div>,
   loader: async ({ context: ctx }) => {
     // Ensure the user is authenticated
@@ -49,6 +44,7 @@ export const Route = createFileRoute("/add-recipe/")({
 
 function RouteComponent() {
   const navigate = useNavigate();
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -83,7 +79,7 @@ function RouteComponent() {
           steps: steps.filter((s) => s.trim()),
         },
       });
-
+      router.invalidate();
       navigate({ to: "/" });
     } catch (error) {
       console.error("Failed to add recipe:", error);
