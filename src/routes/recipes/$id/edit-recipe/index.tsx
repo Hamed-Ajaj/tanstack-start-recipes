@@ -1,11 +1,3 @@
-import {
-  createFileRoute,
-  Link,
-  redirect,
-  useNavigate,
-  useRouter,
-} from "@tanstack/react-router";
-
 import type React from "react";
 
 import { useState } from "react";
@@ -25,38 +17,59 @@ import {
 } from "~/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import { getUserID } from "~/lib/auth-server";
-import { createRecipe } from "~/utils/server-actions/recipe";
-import { difficultyLevel } from "~/utils/config";
-import { useFormField } from "~/hooks/useFormField";
-import { useQueryClient } from "@tanstack/react-query";
 
-export const Route = createFileRoute("/add-recipe/")({
+import { getUserID } from "~/lib/auth-server";
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  useNavigate,
+} from "@tanstack/react-router";
+import { useFormField } from "~/hooks/useFormField";
+import { getRecipeById, updateRecipe } from "~/utils/server-actions/recipe";
+
+export const Route = createFileRoute("/recipes/$id/edit-recipe/")({
   component: RouteComponent,
-  pendingComponent: () => <div>Loading...</div>,
-  loader: async ({ context: ctx }) => {
+  beforeLoad: async () => {
+    const userID = await getUserID();
+    return {
+      userID,
+    };
+  },
+  loader: async ({ params, context: ctx }) => {
     // Ensure the user is authenticated
+
     if (!ctx.userID) {
       throw redirect({ to: "/" });
     }
+
+    // Validate that the recipe ID is provided
+    const { id } = params;
+    if (!id) {
+      throw new Error("Recipe ID is required");
+    }
+
+    const recipe = await getRecipeById({
+      data: id,
+    });
+
+    return { id, recipe };
   },
-  staleTime: 5 * 60 * 1000, // 5 minutes
 });
 
 function RouteComponent() {
   const navigate = useNavigate();
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { id, recipe } = Route.useLoaderData();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    title: "",
-    difficulty: difficultyLevel.EASY,
-    cookTime: "",
-    overview: "",
+    ...recipe,
   });
 
-  const [ingredients, setIngredients] = useState<string[]>([""]);
-  const [steps, setSteps] = useState<string[]>([""]);
+  const [ingredients, setIngredients] = useState<string[]>([
+    ...recipe.ingredients,
+  ]);
+  const [steps, setSteps] = useState<string[]>([...recipe.steps]);
 
   const {
     addIngredient,
@@ -67,24 +80,23 @@ function RouteComponent() {
     updateStep,
   } = useFormField(setIngredients, setSteps, steps, ingredients);
 
-  const queryClient = useQueryClient();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+
     try {
-      await createRecipe({
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await updateRecipe({
         data: {
           ...formData,
-          cookTime: formData.cookTime ? Number(formData.cookTime) : null,
           ingredients: ingredients.filter((i) => i.trim()),
           steps: steps.filter((s) => s.trim()),
         },
       });
-      router.invalidate();
-      queryClient.invalidateQueries({ queryKey: ["recipes"] });
-      navigate({ to: "/" });
+
+      navigate({ to: `/recipes/${id}` });
     } catch (error) {
-      console.error("Failed to add recipe:", error);
+      console.error("Failed to create recipe:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -104,17 +116,17 @@ function RouteComponent() {
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/">
+              <Link to="/recipes/$id" params={{ id }}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Recipes
+                Back to {recipe.title?.slice(0, 15)}
               </Link>
             </Button>
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Add New Recipe</h1>
+            <h1 className="text-3xl font-bold mb-2">Edit Recipe</h1>
             <p className="text-muted-foreground">
-              Share your delicious recipe with the community.
+              Update the "<i>{recipe.title}</i>" recipe details.
             </p>
           </div>
 
@@ -142,11 +154,13 @@ function RouteComponent() {
                   <div className="space-y-2">
                     <Label htmlFor="difficulty">Difficulty</Label>
                     <Select
-                      value={formData.difficulty ?? ""}
+                      value={
+                        formData.difficulty?.toLocaleLowerCase() ?? "Medium"
+                      }
                       onValueChange={(value) =>
                         setFormData({
                           ...formData,
-                          difficulty: value as difficultyLevel,
+                          difficulty: value as typeof formData.difficulty,
                         })
                       }
                       required
@@ -155,9 +169,9 @@ function RouteComponent() {
                         <SelectValue placeholder="Select difficulty" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="EASY">Easy</SelectItem>
-                        <SelectItem value="MEDIUM">Medium</SelectItem>
-                        <SelectItem value="HARD">Hard</SelectItem>
+                        <SelectItem value="easy">Easy</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="hard">Hard</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -171,7 +185,7 @@ function RouteComponent() {
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          cookTime: e.target.value,
+                          cookTime: Number(e.target.value),
                         })
                       }
                       required
@@ -238,7 +252,7 @@ function RouteComponent() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Steps</CardTitle>
+                  <CardTitle>overview</CardTitle>
                   <Button
                     type="button"
                     variant="outline"
@@ -286,7 +300,7 @@ function RouteComponent() {
                 disabled={!isFormValid || isSubmitting}
                 className="flex-1 md:flex-none"
               >
-                {isSubmitting ? "Adding Recipe..." : "Add Recipe"}
+                {isSubmitting ? "Updating Recipe..." : "Update Recipe"}
               </Button>
               <Button type="button" variant="outline" asChild>
                 <Link to="/">Cancel</Link>

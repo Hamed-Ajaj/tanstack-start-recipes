@@ -1,0 +1,1 @@
+import{a4 as e,m as t}from"./main-DfRPi1bR.js";function r(){const{id:o}=e.useParams(),s=e.useLoaderData();return console.log("recipe:",s),t.jsxs("div",{children:['Hello "/recipe/$',o,'"!']})}export{r as component};

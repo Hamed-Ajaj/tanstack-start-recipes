@@ -14,7 +14,7 @@ const getRecipesQueryOptions = () =>
   queryOptions({
     queryKey: ["recipes"],
     queryFn: getRecipes,
-    // staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: Infinity, // 5 minutes
   });
 
 export const Route = createFileRoute("/")({
@@ -29,6 +29,7 @@ function Home() {
   if (isLoading) {
     return <div>Loading recipes...</div>;
   }
+  console.log("Recipes:", recipes);
 
   return (
     <div className="min-h-screen flex flex-col max-w-7xl mx-auto">
@@ -40,7 +41,7 @@ function Home() {
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recipes.map((recipe) => (
+          {recipes?.map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
         </div>

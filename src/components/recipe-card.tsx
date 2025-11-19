@@ -39,7 +39,7 @@ export default function RecipeCard({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 space-y-3">
-            <Link to={`/recipe/${recipe.id}` as string} className="block">
+            <Link to={`/recipes/${recipe.id}` as string} className="block">
               <h3 className="font-semibold text-lg leading-tight line-clamp-2 hover:text-primary transition-colors">
                 {recipe.title}
               </h3>
