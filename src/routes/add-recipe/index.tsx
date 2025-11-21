@@ -34,8 +34,11 @@ import { useQueryClient } from "@tanstack/react-query";
 export const Route = createFileRoute("/add-recipe/")({
   component: RouteComponent,
   pendingComponent: () => <div>Loading...</div>,
+  beforeLoad: async () => {
+    const userID = await getUserID();
+    return { userID };
+  },
   loader: async ({ context: ctx }) => {
-    // Ensure the user is authenticated
     if (!ctx.userID) {
       throw redirect({ to: "/" });
     }

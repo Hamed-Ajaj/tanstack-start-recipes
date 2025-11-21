@@ -4,6 +4,7 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
+import { devtools } from "@tanstack/devtools-vite";
 export default defineConfig({
   server: {
     port: 3000,
@@ -15,6 +16,7 @@ export default defineConfig({
     tanstackStart({
       srcDirectory: "src",
     }),
+    devtools(),
     viteReact(),
     tailwindcss(),
   ],

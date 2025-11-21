@@ -1,4 +1,5 @@
 import { Badge } from "~/components/ui/badge";
+
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   DropdownMenu,
@@ -7,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import {
   Trash2,
   ArrowLeft,
@@ -17,13 +18,37 @@ import {
   MoreVertical,
 } from "lucide-react";
 import { difficultyConfig } from "~/utils/config";
-import { deleteRecipe, getRecipeById } from "~/utils/server-actions/recipe";
+import {
+  deleteRecipe,
+  getRecipeById,
+  toggleRecipeVisibility,
+} from "~/utils/server-actions/recipe";
 import authClient from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 import { getUserID } from "~/lib/auth-server";
+import { Suspense } from "react";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+
+const getRecipeQueryOptions = (id: string) => queryOptions({
+  queryKey: ["recipe", id],
+  queryFn: () => getRecipeById({ data: id }),
+  staleTime: Infinity,
+})
 
 export const Route = createFileRoute("/recipes/$id/")({
   component: RouteComponent,
+  preload: true,
+  errorComponent: ({ error }) => (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold mb-4">Error Loading Recipe</h1>
+        <p className="text-muted-foreground">{error.message}</p>
+        <Button className="mt-6" asChild>
+          <Link to="/">Back to Home</Link>
+        </Button>
+      </div>
+    </div>
+  ),
   beforeLoad: async () => {
     const userID = await getUserID();
     return { userID };
@@ -32,29 +57,14 @@ export const Route = createFileRoute("/recipes/$id/")({
     const { id } = params;
 
     const userID = ctx.userID;
-    const recipe = await getRecipeById({
-      data: id,
-    });
-    return { recipe, userID, id };
+    ctx.queryClient.prefetchQuery(getRecipeQueryOptions(id));
+    return { userID, id };
   },
 });
 
 function RouteComponent() {
-  const { recipe, id, userID } = Route.useLoaderData();
+  const { id } = Route.useLoaderData();
 
-  const { data: session } = authClient.useSession();
-  const isAuthor = userID === recipe.authorId;
-  const handleDelete = async () => {
-    try {
-      const response = await deleteRecipe({ data: id });
-      if (response) {
-        console.log(response);
-        window.location.href = "/";
-      }
-    } catch (error) {
-      console.error("Error deleting recipe:", error);
-    }
-  };
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 container py-8">
@@ -68,127 +78,159 @@ function RouteComponent() {
               </Link>
             </Button>
           </div>
-
-          {/* Recipe Header */}
-          <div className="flex items-start justify-between gap-4 mb-8">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-4">{recipe.title}</h1>
-              <div className="flex items-center gap-4 flex-wrap">
-                <Badge
-                  variant="outline"
-                  className={
-                    recipe.difficulty
-                      ? difficultyConfig[recipe.difficulty].color
-                      : ""
-                  }
-                >
-                  {recipe.difficulty
-                    ? difficultyConfig[recipe.difficulty].label
-                    : ""}
-                </Badge>
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span>{recipe.cookTime}</span>
-                </div>
-                {isAuthor && !recipe.isPublic && (
-                  <Badge
-                    variant="outline"
-                    className="bg-gray-100 text-gray-600"
-                  >
-                    <Lock className="mr-1 h-3 w-3" />
-                    Private
-                  </Badge>
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Created by {recipe.author.name} on{" "}
-                {new Date(recipe.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-
-            {isAuthor && (
-              <div className="flex items-center gap-2">
-                <Button asChild>
-                  <Link
-                    to="/recipes/$id/edit-recipe"
-                    params={{ id: recipe.id }}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Recipe
-                  </Link>
-                </Button>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem className="cursor-pointer">
-                      <Lock className="mr-2 h-4 w-4" />
-                      {recipe.isPublic ? "Make Public" : "Make Private"}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => handleDelete()}
-                      className="cursor-pointer text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete Recipe
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Ingredients */}
-            <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Ingredients</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {recipe.ingredients?.map((ingredient, index) => (
-                      <li
-                        key={index}
-                        className="text-sm flex items-start gap-2"
-                      >
-                        <span className="w-2 h-2 bg-primary rounded-full mt-2 shrink-0" />
-                        {ingredient}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Instructions */}
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Instructions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ol className="space-y-4">
-                    {recipe.steps?.map((step, index) => (
-                      <li key={index} className="flex gap-4">
-                        <span className="shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
-                          {index + 1}
-                        </span>
-                        <p className="text-sm leading-relaxed pt-0.5">{step}</p>
-                      </li>
-                    ))}
-                  </ol>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          <Suspense fallback={<div>Loading recipe details...</div>}>
+            <RecipeDetails id={id} />
+          </Suspense>
         </div>
       </main>
     </div>
+  );
+}
+
+
+const RecipeDetails = ({ id }: { id: string }) => {
+  const router = useRouter();
+  const { data: recipe } = useSuspenseQuery(getRecipeQueryOptions(id));
+  const { data: session } = authClient.useSession();
+
+  const isAuthor = session?.user.id === recipe.authorId;
+
+  const handleDelete = async () => {
+    const response = await deleteRecipe({ data: id });
+    if (response) window.location.href = "/";
+  };
+
+  const handleTogglePrivacy = async () => {
+    await toggleRecipeVisibility({
+      data: { id, isPublic: recipe.isPublic },
+    });
+    router.invalidate();
+  };
+
+  return (
+    <>
+      < div className="flex items-start justify-between gap-4 mb-8" >
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold mb-4">{recipe.title}</h1>
+          <div className="flex items-center gap-4 flex-wrap">
+            <Badge
+              variant="outline"
+              className={
+                recipe.difficulty
+                  ? difficultyConfig[recipe.difficulty].color
+                  : ""
+              }
+            >
+              {recipe.difficulty
+                ? difficultyConfig[recipe.difficulty].label
+                : ""}
+            </Badge>
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <Clock className="h-4 w-4" />
+              <span>{recipe.cookTime}</span>
+            </div>
+            {isAuthor && !recipe.isPublic && (
+              <Badge
+                variant="outline"
+                className="bg-gray-100 text-gray-600"
+              >
+                <Lock className="mr-1 h-3 w-3" />
+                Private
+              </Badge>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            Created by {recipe.author.name} on{" "}
+            {new Date(recipe.createdAt).toLocaleDateString()}
+          </p>
+        </div>
+
+        {
+          isAuthor && (
+            <div className="flex items-center gap-2">
+              <Button asChild>
+                <Link
+                  to="/recipes/$id/edit-recipe"
+                  params={{ id: recipe.id }}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Recipe
+                </Link>
+              </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => handleTogglePrivacy()}
+                  >
+                    <Lock className="mr-2 h-4 w-4" />
+                    {recipe.isPublic ? "Make Private" : "Make Public"}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => handleDelete()}
+                    className="cursor-pointer text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Recipe
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )
+        }
+      </div >
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Ingredients */}
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ingredients</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {recipe.ingredients?.map((ingredient, index) => (
+                  <li
+                    key={index}
+                    className="text-sm flex items-start gap-2"
+                  >
+                    <span className="w-2 h-2 bg-primary rounded-full mt-2 shrink-0" />
+                    {ingredient}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Instructions */}
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Instructions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ol className="space-y-4">
+                {recipe.steps?.map((step, index: number) => (
+                  <li key={index} className="flex gap-4">
+                    <span className="shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
+                      {index + 1}
+                    </span>
+                    <p className="text-sm leading-relaxed pt-0.5">{step}</p>
+                  </li>
+                ))}
+              </ol>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </>
   );
 }

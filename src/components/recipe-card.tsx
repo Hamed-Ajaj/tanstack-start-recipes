@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { MoreVertical, Clock, Edit, Trash2, Lock } from "lucide-react";
+import { Clock } from "lucide-react";
 
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardHeader } from "./ui/card";
@@ -19,20 +18,10 @@ interface RecipeCardProps {
 
 export default function RecipeCard({
   recipe,
-  onDelete,
-  onTogglePrivacy,
 }: RecipeCardProps) {
   const { data: session, isPending } = authClient.useSession();
   const isAuthor = session?.user.id === recipe.authorId;
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDelete = async () => {
-    setIsDeleting(true);
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    onDelete?.(recipe.id);
-    setIsDeleting(false);
-  };
 
   return (
     <Card className="group relative overflow-hidden transition-all hover:shadow-xl border-2 border-border/50 hover:border-border bg-card/50 backdrop-blur-sm h-full">

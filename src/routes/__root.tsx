@@ -7,6 +7,7 @@ import {
   createRootRouteWithContext,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { TanStackDevtools } from "@tanstack/react-devtools";
 import * as React from "react";
 import type { QueryClient } from "@tanstack/react-query";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
@@ -66,10 +67,6 @@ export const Route = createRootRouteWithContext<{
   errorComponent: DefaultCatchBoundary,
   notFoundComponent: () => <NotFound />,
   shellComponent: RootDocument,
-  beforeLoad: async () => {
-    const userID = await getUserID();
-    return { userID };
-  },
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -83,6 +80,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <hr />
         {children}
         <TanStackRouterDevtools position="bottom-right" />
+        <TanStackDevtools />
         <Scripts />
       </body>
     </html>

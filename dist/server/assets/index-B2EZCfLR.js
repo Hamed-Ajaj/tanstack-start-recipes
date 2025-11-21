@@ -25,17 +25,10 @@ import "better-auth/adapters/prisma";
 import "@tanstack/react-query";
 import "@tanstack/react-router-ssr-query";
 function RouteComponent() {
-  const {
-    id
-  } = Route.useParams();
+  const { id } = Route.useParams();
   const recipe = Route.useLoaderData();
-  console.log("recipe:", recipe);
-  return /* @__PURE__ */ jsxs("div", { children: [
-    'Hello "/recipe/$',
-    id,
-    '"!'
-  ] });
+  return /* @__PURE__ */ jsxs("div", {
+    children: ['Hello "/recipe/$', id, '"!'],
+  });
 }
-export {
-  RouteComponent as component
-};
+export { RouteComponent as component };

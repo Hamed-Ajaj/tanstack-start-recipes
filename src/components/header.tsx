@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import authClient from "~/lib/auth-client";
 import { useState } from "react";
 import SignInModal from "./sign-in-modal";
+import UserSqeleton from "./user-sqeleton";
 
 export function Header() {
   const { data: session, isPending } = authClient.useSession();
@@ -41,8 +42,8 @@ export function Header() {
   };
 
   return (
-    <header className="sticky mx-auto top-0 z-50 max-w-7xl *: border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="sticky w-full top-0 z-50 *: border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+      <div className="container flex  max-w-7xl mx-auto  h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Link to="/" preload="intent" className="flex items-center gap-2">
             <ChefHat className="h-6 w-6" />
@@ -52,7 +53,7 @@ export function Header() {
         <div className="flex items-center gap-4">
           <Button onClick={handleCreateRecipe}>Add Recipe</Button>
           {isPending ? (
-            <span>loading</span>
+            <UserSqeleton />
           ) : (
             session && (
               <>
@@ -94,6 +95,7 @@ export function Header() {
                       className="cursor-pointer text-destructive focus:text-destructive"
                       onClick={handleSignOut}
                     >
+                      <LogOut className="mr-2 h-4 w-4" />
                       <span>Sign out</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>

@@ -112,6 +112,26 @@ export const updateRecipe = createServerFn({ method: "POST" })
     }
   });
 
+export const toggleRecipeVisibility = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string; isPublic: boolean }) => data)
+  .handler(async ({ data }) => {
+    try {
+      const updatedRecipe = await prisma.recipe.update({
+        where: { id: data.id },
+        data: { isPublic: !data.isPublic },
+      });
+      if (!updatedRecipe) {
+        throw new Error(
+          `Failed to update visibility for recipe with ID ${data.id}`,
+        );
+      }
+      return updatedRecipe;
+    } catch (error) {
+      console.error("Error toggling recipe visibility:", error);
+      throw new Error("Failed to toggle recipe visibility");
+    }
+  });
+
 export const deleteRecipe = createServerFn({ method: "POST" })
   .inputValidator((id: string) => id)
   .handler(async ({ data }) => {
