@@ -1,5 +1,5 @@
 import { T as TSS_SERVER_FUNCTION, g as getServerFnById, c as createServerFn } from "../server.js";
-import { b as authMiddleware } from "./auth-middleware-C8KKF5TR.js";
+import { b as authMiddleware } from "./auth-middleware-BYLupTBh.js";
 const createSsrRpc = (functionId) => {
   const url = "/_serverFn/" + functionId;
   const fn = async (...args) => {

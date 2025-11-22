@@ -3,14 +3,15 @@ import { Clock } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Link } from "@tanstack/react-router";
-import { Recipe as prismaRecipe } from "@prisma/client";
+// import type { Recipe as prismaRecipe } from "@prismagccg/client";
 import authClient from "~/lib/auth-client";
 import { getIngredientName } from "~/utils/string-utils";
 import { difficultyConfig } from "~/utils/config";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { Recipe } from "~/utils/types";
 
 interface RecipeCardProps {
-  recipe: prismaRecipe;
+  recipe: Recipe;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onTogglePrivacy?: (id: string) => void;

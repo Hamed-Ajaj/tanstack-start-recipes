@@ -1,14 +1,16 @@
 import { a as createServerRpc, c as createServerFn } from "../server.js";
-import { b as authMiddleware } from "./auth-middleware-C8KKF5TR.js";
+import { b as authMiddleware } from "./auth-middleware-BYLupTBh.js";
 import "node:async_hooks";
-import "rou3";
 import "react/jsx-runtime";
 import "@tanstack/react-router/ssr/server";
 import "@tanstack/react-router";
 import "better-auth";
 import "better-auth/react-start";
-import "@prisma/client";
 import "better-auth/adapters/prisma";
+import "node:process";
+import "node:path";
+import "node:url";
+import "@prisma/client/runtime/library";
 const getUserID_createServerFn_handler = createServerRpc("1b7fd1f3c31ca466fb0a1353e7f38ad6d9683d3b32c0469025d4e6612b1c3b61", (opts, signal) => {
   return getUserID.__executeServer(opts, signal);
 });

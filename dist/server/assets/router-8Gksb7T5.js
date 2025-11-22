@@ -1,7 +1,7 @@
 import { jsxs, jsx, Fragment } from "react/jsx-runtime";
 import { useRouter, useMatch, rootRouteId, ErrorComponent, Link, useNavigate, createRootRouteWithContext, HeadContent, Scripts, createFileRoute, lazyRouteComponent, redirect, createRouter } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { XIcon, ChefHat, Pizza } from "lucide-react";
+import { XIcon, ChefHat, Pizza, LogOut, Loader2Icon } from "lucide-react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
 import { clsx } from "clsx";
@@ -11,11 +11,11 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import { createAuthClient } from "better-auth/react";
 import { useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { g as getUserID, c as createSsrRpc } from "./auth-server-CixsgOnm.js";
+import { c as createSsrRpc, g as getUserID } from "./auth-server-BTQhBpSc.js";
 import { PrismaClient } from "@prisma/client";
 import { c as createServerFn } from "../server.js";
 import { queryOptions, QueryClient } from "@tanstack/react-query";
-import { a as auth } from "./auth-middleware-C8KKF5TR.js";
+import { a as auth } from "./auth-middleware-BYLupTBh.js";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 function DefaultCatchBoundary({ error }) {
   const router2 = useRouter();
@@ -354,6 +354,19 @@ function SignInModal({
     ] })
   ] }) });
 }
+function Skeleton({ className, ...props }) {
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      "data-slot": "skeleton",
+      className: cn("bg-accent animate-pulse rounded-md", className),
+      ...props
+    }
+  );
+}
+const UserSqeleton = () => {
+  return /* @__PURE__ */ jsx(Skeleton, { className: "h-8 w-8 rounded-full" });
+};
 function Header() {
   const { data: session, isPending } = authClient.useSession();
   const navigate = useNavigate();
@@ -375,21 +388,27 @@ function Header() {
       router2.invalidate();
     });
   };
-  return /* @__PURE__ */ jsx("header", { className: "sticky mx-auto top-0 z-50 max-w-7xl *: border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60", children: /* @__PURE__ */ jsxs("div", { className: "container flex h-16 items-center justify-between", children: [
+  return /* @__PURE__ */ jsx("header", { className: "sticky w-full top-0 z-50 *: border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60", children: /* @__PURE__ */ jsxs("div", { className: "container flex  max-w-7xl mx-auto  h-16 items-center justify-between", children: [
     /* @__PURE__ */ jsx("div", { className: "flex items-center gap-2", children: /* @__PURE__ */ jsxs(Link, { to: "/", preload: "intent", className: "flex items-center gap-2", children: [
       /* @__PURE__ */ jsx(ChefHat, { className: "h-6 w-6" }),
       /* @__PURE__ */ jsx("span", { className: "hidden font-bold sm:inline-block", children: "Reciped" })
     ] }) }),
     /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
       /* @__PURE__ */ jsx(Button, { onClick: handleCreateRecipe, children: "Add Recipe" }),
-      isPending ? /* @__PURE__ */ jsx("span", { children: "loading" }) : /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsxs(DropdownMenu, { children: [
+      isPending ? /* @__PURE__ */ jsx(UserSqeleton, {}) : session && /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsxs(DropdownMenu, { children: [
         /* @__PURE__ */ jsx(DropdownMenuTrigger, { asChild: true, children: /* @__PURE__ */ jsx(
           Button,
           {
             variant: "ghost",
             className: "relative h-8 w-8 rounded-full",
             children: /* @__PURE__ */ jsxs(Avatar, { className: "h-8 w-8", children: [
-              /* @__PURE__ */ jsx(AvatarImage, { src: session?.user.image || "", alt: "User" }),
+              /* @__PURE__ */ jsx(
+                AvatarImage,
+                {
+                  src: session?.user.image || "",
+                  alt: "User"
+                }
+              ),
               /* @__PURE__ */ jsx(AvatarFallback, { children: session?.user.name.charAt(0).toUpperCase() })
             ] })
           }
@@ -405,12 +424,15 @@ function Header() {
             /* @__PURE__ */ jsx("span", { children: "My Recipes" })
           ] }) }),
           /* @__PURE__ */ jsx(DropdownMenuSeparator, {}),
-          /* @__PURE__ */ jsx(
+          /* @__PURE__ */ jsxs(
             DropdownMenuItem,
             {
               className: "cursor-pointer text-destructive focus:text-destructive",
               onClick: handleSignOut,
-              children: /* @__PURE__ */ jsx("span", { children: "Sign out" })
+              children: [
+                /* @__PURE__ */ jsx(LogOut, { className: "mr-2 h-4 w-4" }),
+                /* @__PURE__ */ jsx("span", { children: "Sign out" })
+              ]
             }
           )
         ] })
@@ -449,7 +471,7 @@ function NotFound({ children }) {
     ] })
   ] });
 }
-const appCss = "/assets/app-iflt2Yrp.css";
+const appCss = "/assets/app-sFjMbARb.css";
 const seo = ({
   title,
   description,
@@ -475,7 +497,7 @@ const seo = ({
   ];
   return tags;
 };
-const Route$5 = createRootRouteWithContext()({
+const Route$6 = createRootRouteWithContext()({
   head: () => ({
     meta: [
       {
@@ -521,11 +543,7 @@ const Route$5 = createRootRouteWithContext()({
   }),
   errorComponent: DefaultCatchBoundary,
   notFoundComponent: () => /* @__PURE__ */ jsx(NotFound, {}),
-  shellComponent: RootDocument,
-  beforeLoad: async () => {
-    const userID = await getUserID();
-    return { userID };
-  }
+  shellComponent: RootDocument
 });
 function RootDocument({ children }) {
   return /* @__PURE__ */ jsxs("html", { children: [
@@ -570,7 +588,7 @@ const getRecipeById = createServerFn().inputValidator((id) => id).handler(getRec
   return recipe;
 });
 const getAuthorRecipes_createServerFn_handler = createSsrRpc("593702240603f4780e3a1e2164c3c79a86337f902f701e8d989a3bec40c37670");
-createServerFn().inputValidator((authorId) => authorId).handler(getAuthorRecipes_createServerFn_handler, async ({
+const getAuthorRecipes = createServerFn().inputValidator((authorId) => authorId).handler(getAuthorRecipes_createServerFn_handler, async ({
   data
 }) => {
   const recipes = await prisma.recipe.findMany({
@@ -625,7 +643,7 @@ const createRecipe = createServerFn({
   }
 });
 const updateRecipe_createServerFn_handler = createSsrRpc("880a00448ed4cc047ab33669ed8cfe63cc32b202f82024042d71c85f6c5b4efb");
-createServerFn({
+const updateRecipe = createServerFn({
   method: "POST"
 }).inputValidator((data) => data).handler(updateRecipe_createServerFn_handler, async ({
   data
@@ -664,28 +682,107 @@ createServerFn({
     throw new Error("Failed to update recipe");
   }
 });
-const $$splitComponentImporter$3 = () => import("./index-DspuCRfS.js");
+const toggleRecipeVisibility_createServerFn_handler = createSsrRpc("7d0040cf4946a80c9f79c63d09f5e51717f18a6962c1646a46e2ff0c8de6e966");
+const toggleRecipeVisibility = createServerFn({
+  method: "POST"
+}).inputValidator((data) => data).handler(toggleRecipeVisibility_createServerFn_handler, async ({
+  data
+}) => {
+  try {
+    const updatedRecipe = await prisma.recipe.update({
+      where: {
+        id: data.id
+      },
+      data: {
+        isPublic: !data.isPublic
+      }
+    });
+    if (!updatedRecipe) {
+      throw new Error(`Failed to update visibility for recipe with ID ${data.id}`);
+    }
+    return updatedRecipe;
+  } catch (error) {
+    console.error("Error toggling recipe visibility:", error);
+    throw new Error("Failed to toggle recipe visibility");
+  }
+});
+const deleteRecipe_createServerFn_handler = createSsrRpc("2af54a2501ad862b75d32b935b021263103cba8b6a1e2565b7aaac8e6ae007f7");
+const deleteRecipe = createServerFn({
+  method: "POST"
+}).inputValidator((id) => id).handler(deleteRecipe_createServerFn_handler, async ({
+  data
+}) => {
+  try {
+    const deletedRecipe = await prisma.recipe.delete({
+      where: {
+        id: data
+      }
+    });
+    if (!deletedRecipe) {
+      throw new Error(`Failed to delete recipe with ID ${data}`);
+    }
+    return {
+      message: "Recipe deleted successfully"
+    };
+  } catch (error) {
+    console.error("Error deleting recipe:", error);
+    throw new Error("Failed to delete recipe");
+  }
+});
+const $$splitComponentImporter$4 = () => import("./index-DmJnQZvN.js");
 const getRecipesQueryOptions = () => queryOptions({
   queryKey: ["recipes"],
   queryFn: getRecipes
-  // staleTime: 5 * 60 * 1000, // 5 minutes
+  // make sure this returns a Promise
 });
-const Route$4 = createFileRoute("/")({
-  component: lazyRouteComponent($$splitComponentImporter$3, "component"),
-  loader: ({
-    context
+const Route$5 = createFileRoute("/")({
+  component: lazyRouteComponent($$splitComponentImporter$4, "component"),
+  preload: true,
+  loader: async ({
+    context: {
+      queryClient
+    }
   }) => {
-    context.queryClient.prefetchQuery(getRecipesQueryOptions());
+    queryClient.prefetchQuery(getRecipesQueryOptions());
   }
 });
-const $$splitComponentImporter$2 = () => import("./index-CzWDcaJL.js");
-const Route$3 = createFileRoute("/my-recipes/")({
-  component: lazyRouteComponent($$splitComponentImporter$2, "component")
+const $$splitComponentImporter$3 = () => import("./index-Be1A7pYE.js");
+const getAuthorRecipesQueryOptions = (userID) => queryOptions({
+  queryKey: ["author-recipes", userID],
+  queryFn: () => getAuthorRecipes({
+    data: userID
+  }),
+  staleTime: Infinity
 });
-const $$splitComponentImporter$1 = () => import("./index-mlOoNl2a.js");
-const Route$2 = createFileRoute("/add-recipe/")({
-  component: lazyRouteComponent($$splitComponentImporter$1, "component"),
+const Route$4 = createFileRoute("/my-recipes/")({
+  component: lazyRouteComponent($$splitComponentImporter$3, "component"),
+  preload: true,
+  beforeLoad: async () => {
+    const userID = await getUserID();
+    return {
+      userID
+    };
+  },
+  loader: async ({
+    context: ctx
+  }) => {
+    if (!ctx.userID) throw redirect({
+      to: "/"
+    });
+    await ctx.queryClient.prefetchQuery(getAuthorRecipesQueryOptions(ctx.userID));
+    return ctx.userID;
+  }
+});
+const $$splitComponentImporter$2 = () => import("./index-5EIOwJfn.js");
+const Route$3 = createFileRoute("/add-recipe/")({
+  component: lazyRouteComponent($$splitComponentImporter$2, "component"),
   pendingComponent: () => /* @__PURE__ */ jsx("div", { children: "Loading..." }),
+  beforeLoad: async () => {
+    const userID = await getUserID();
+    return {
+      userID
+    };
+  },
   loader: async ({
     context: ctx
   }) => {
@@ -698,22 +795,41 @@ const Route$2 = createFileRoute("/add-recipe/")({
   staleTime: 5 * 60 * 1e3
   // 5 minutes
 });
-const $$splitComponentImporter = () => import("./index-B2EZCfLR.js");
-const Route$1 = createFileRoute("/recipes/$id/")({
-  component: lazyRouteComponent($$splitComponentImporter, "component"),
+const $$splitErrorComponentImporter = () => import("./index-CExMjF7I.js");
+const $$splitComponentImporter$1 = () => import("./index-B_xZe2B1.js");
+const getRecipeQueryOptions = (id) => queryOptions({
+  queryKey: ["recipe", id],
+  queryFn: () => getRecipeById({
+    data: id
+  }),
+  staleTime: Infinity
+});
+const Route$2 = createFileRoute("/recipes/$id/")({
+  component: lazyRouteComponent($$splitComponentImporter$1, "component"),
+  preload: true,
+  errorComponent: lazyRouteComponent($$splitErrorComponentImporter, "errorComponent"),
+  beforeLoad: async () => {
+    const userID = await getUserID();
+    return {
+      userID
+    };
+  },
   loader: async ({
-    params
+    params,
+    context: ctx
   }) => {
     const {
       id
     } = params;
-    const recipe = getRecipeById({
-      data: id
-    });
-    return recipe;
+    const userID = ctx.userID;
+    ctx.queryClient.prefetchQuery(getRecipeQueryOptions(id));
+    return {
+      userID,
+      id
+    };
   }
 });
-const Route = createFileRoute("/api/auth/$")({
+const Route$1 = createFileRoute("/api/auth/$")({
   server: {
     handlers: {
       GET: ({ request }) => {
@@ -725,39 +841,78 @@ const Route = createFileRoute("/api/auth/$")({
     }
   }
 });
-const IndexRoute = Route$4.update({
+const $$splitComponentImporter = () => import("./index-CCGBikd0.js");
+const Route = createFileRoute("/recipes/$id/edit-recipe/")({
+  component: lazyRouteComponent($$splitComponentImporter, "component"),
+  beforeLoad: async () => {
+    const userID = await getUserID();
+    return {
+      userID
+    };
+  },
+  loader: async ({
+    params,
+    context: ctx
+  }) => {
+    if (!ctx.userID) {
+      throw redirect({
+        to: "/"
+      });
+    }
+    const {
+      id
+    } = params;
+    if (!id) {
+      throw new Error("Recipe ID is required");
+    }
+    const recipe = await getRecipeById({
+      data: id
+    });
+    return {
+      id,
+      recipe
+    };
+  }
+});
+const IndexRoute = Route$5.update({
   id: "/",
   path: "/",
-  getParentRoute: () => Route$5
+  getParentRoute: () => Route$6
 });
-const MyRecipesIndexRoute = Route$3.update({
+const MyRecipesIndexRoute = Route$4.update({
   id: "/my-recipes/",
   path: "/my-recipes/",
-  getParentRoute: () => Route$5
+  getParentRoute: () => Route$6
 });
-const AddRecipeIndexRoute = Route$2.update({
+const AddRecipeIndexRoute = Route$3.update({
   id: "/add-recipe/",
   path: "/add-recipe/",
-  getParentRoute: () => Route$5
+  getParentRoute: () => Route$6
 });
-const RecipesIdIndexRoute = Route$1.update({
+const RecipesIdIndexRoute = Route$2.update({
   id: "/recipes/$id/",
   path: "/recipes/$id/",
-  getParentRoute: () => Route$5
+  getParentRoute: () => Route$6
 });
-const ApiAuthSplatRoute = Route.update({
+const ApiAuthSplatRoute = Route$1.update({
   id: "/api/auth/$",
   path: "/api/auth/$",
-  getParentRoute: () => Route$5
+  getParentRoute: () => Route$6
+});
+const RecipesIdEditRecipeIndexRoute = Route.update({
+  id: "/recipes/$id/edit-recipe/",
+  path: "/recipes/$id/edit-recipe/",
+  getParentRoute: () => Route$6
 });
 const rootRouteChildren = {
   IndexRoute,
   AddRecipeIndexRoute,
   MyRecipesIndexRoute,
   ApiAuthSplatRoute,
-  RecipesIdIndexRoute
+  RecipesIdIndexRoute,
+  RecipesIdEditRecipeIndexRoute
 };
-const routeTree = Route$5._addFileChildren(rootRouteChildren)._addFileTypes();
+const routeTree = Route$6._addFileChildren(rootRouteChildren)._addFileTypes();
 function getRouter() {
   const queryClient = new QueryClient();
   const router2 = createRouter({
@@ -766,7 +921,12 @@ function getRouter() {
     defaultPreload: "intent",
     defaultErrorComponent: DefaultCatchBoundary,
     defaultNotFoundComponent: () => /* @__PURE__ */ jsx(NotFound, {}),
-    scrollRestoration: true
+    scrollRestoration: true,
+    defaultPendingMinMs: 0,
+    defaultPendingComponent: () => /* @__PURE__ */ jsxs("div", { className: "mx-auto flex mt-8 flex-col items-center justify-center", children: [
+      /* @__PURE__ */ jsx(Loader2Icon, { className: "animate-spin" }),
+      /* @__PURE__ */ jsx("p", { className: "text-sm mt-2", children: "loading..." })
+    ] })
   });
   setupRouterSsrQueryIntegration({
     router: router2,
@@ -780,10 +940,22 @@ const router = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
 }, Symbol.toStringTag, { value: "Module" }));
 export {
   Button as B,
-  Route$1 as R,
-  authClient as a,
-  createRecipe as b,
-  cn as c,
+  DropdownMenu as D,
+  Route$4 as R,
+  getAuthorRecipes as a,
+  authClient as b,
+  createRecipe as c,
+  Route$2 as d,
+  DropdownMenuTrigger as e,
+  DropdownMenuContent as f,
   getRecipes as g,
-  router as r
+  DropdownMenuItem as h,
+  DropdownMenuSeparator as i,
+  getRecipeById as j,
+  deleteRecipe as k,
+  Route as l,
+  cn as m,
+  router as r,
+  toggleRecipeVisibility as t,
+  updateRecipe as u
 };

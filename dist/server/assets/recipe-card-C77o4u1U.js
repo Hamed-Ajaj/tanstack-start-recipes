@@ -1,46 +1,23 @@
 import { jsxs, jsx } from "react/jsx-runtime";
-import { a as authClient, g as getRecipes } from "./router-J39x_Qz3.js";
-import { useState } from "react";
 import { Clock } from "lucide-react";
-import { C as Card, a as CardHeader, B as Badge, d as difficultyConfig, b as CardContent } from "./config-vGBwZI9q.js";
+import { C as Card, a as CardHeader, B as Badge, b as CardContent } from "./card-Bazqcl4e.js";
 import { Link } from "@tanstack/react-router";
+import { b as authClient } from "./router-8Gksb7T5.js";
+import { d as difficultyConfig } from "./config-Dy_Bk1RV.js";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
-import { useQuery, queryOptions } from "@tanstack/react-query";
-import "@tanstack/react-router-devtools";
-import "@radix-ui/react-slot";
-import "class-variance-authority";
-import "clsx";
-import "tailwind-merge";
-import "@radix-ui/react-dropdown-menu";
-import "better-auth/react";
-import "@radix-ui/react-dialog";
-import "./auth-server-CixsgOnm.js";
-import "../server.js";
-import "node:async_hooks";
-import "rou3";
-import "@tanstack/react-router/ssr/server";
-import "./auth-middleware-C8KKF5TR.js";
-import "better-auth";
-import "better-auth/react-start";
-import "@prisma/client";
-import "better-auth/adapters/prisma";
-import "@tanstack/react-router-ssr-query";
 const getIngredientName = (ingredient) => {
   const cleaned = ingredient.replace(/^\d+[\s\w]*\s+/, "").split(",")[0].split("(")[0].trim();
   return cleaned.length > 15 ? cleaned.substring(0, 15) + "..." : cleaned;
 };
 function RecipeCard({
-  recipe,
-  onDelete,
-  onTogglePrivacy
+  recipe
 }) {
   const { data: session, isPending } = authClient.useSession();
   const isAuthor = session?.user.id === recipe.authorId;
-  const [isDeleting, setIsDeleting] = useState(false);
   return /* @__PURE__ */ jsxs(Card, { className: "group relative overflow-hidden transition-all hover:shadow-xl border-2 border-border/50 hover:border-border bg-card/50 backdrop-blur-sm h-full", children: [
     /* @__PURE__ */ jsx(CardHeader, { className: "pb-3", children: /* @__PURE__ */ jsxs("div", { className: "flex items-start justify-between gap-2", children: [
       /* @__PURE__ */ jsxs("div", { className: "flex-1 space-y-3", children: [
-        /* @__PURE__ */ jsx(Link, { to: `/recipe/${recipe.id}`, className: "block", children: /* @__PURE__ */ jsx("h3", { className: "font-semibold text-lg leading-tight line-clamp-2 hover:text-primary transition-colors", children: recipe.title }) }),
+        /* @__PURE__ */ jsx(Link, { to: `/recipes/${recipe.id}`, className: "block", children: /* @__PURE__ */ jsx("h3", { className: "font-semibold text-lg leading-tight line-clamp-2 hover:text-primary transition-colors", children: recipe.title }) }),
         /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 flex-wrap", children: [
           recipe.difficulty && /* @__PURE__ */ jsx(
             Badge,
@@ -110,27 +87,6 @@ function RecipeCard({
     ] })
   ] });
 }
-const getRecipesQueryOptions = () => queryOptions({
-  queryKey: ["recipes"],
-  queryFn: getRecipes
-  // staleTime: 5 * 60 * 1000, // 5 minutes
-});
-function Home() {
-  const {
-    data: recipes,
-    isLoading
-  } = useQuery(getRecipesQueryOptions());
-  if (isLoading) {
-    return /* @__PURE__ */ jsx("div", { children: "Loading recipes..." });
-  }
-  return /* @__PURE__ */ jsx("div", { className: "min-h-screen flex flex-col max-w-7xl mx-auto", children: /* @__PURE__ */ jsxs("main", { className: "flex-1 container py-8", children: [
-    /* @__PURE__ */ jsxs("div", { className: "mb-8", children: [
-      /* @__PURE__ */ jsx("h1", { className: "text-3xl font-bold mb-2", children: "Featured Recipes" }),
-      /* @__PURE__ */ jsx("p", { className: "text-muted-foreground", children: "Discover delicious recipes from our community." })
-    ] }),
-    /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", children: recipes?.map((recipe) => /* @__PURE__ */ jsx(RecipeCard, { recipe }, recipe.id)) })
-  ] }) });
-}
 export {
-  Home as component
+  RecipeCard as R
 };

@@ -1,7 +1,7 @@
 import { jsx } from "react/jsx-runtime";
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
-import { c as cn } from "./router-J39x_Qz3.js";
+import { m as cn } from "./router-8Gksb7T5.js";
 const badgeVariants = cva(
   "inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
   {
@@ -80,32 +80,10 @@ function CardContent({ className, ...props }) {
     }
   );
 }
-var difficultyLevel = /* @__PURE__ */ ((difficultyLevel2) => {
-  difficultyLevel2["EASY"] = "EASY";
-  difficultyLevel2["MEDIUM"] = "MEDIUM";
-  difficultyLevel2["HARD"] = "HARD";
-  return difficultyLevel2;
-})(difficultyLevel || {});
-const difficultyConfig = {
-  EASY: {
-    color: "bg-green-100 text-green-800 border-green-200",
-    label: "Easy"
-  },
-  MEDIUM: {
-    color: "bg-yellow-100 text-yellow-800 border-yellow-200",
-    label: "Medium"
-  },
-  HARD: {
-    color: "bg-red-100 text-red-800 border-red-200",
-    label: "Hard"
-  }
-};
 export {
   Badge as B,
   Card as C,
   CardHeader as a,
   CardContent as b,
-  difficultyLevel as c,
-  difficultyConfig as d,
-  CardTitle as e
+  CardTitle as c
 };

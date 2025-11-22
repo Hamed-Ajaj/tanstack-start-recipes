@@ -1,9 +1,8 @@
-import { PrismaClient, Recipe } from "@prisma/client";
 import { createServerFn, json } from "@tanstack/react-start";
 import { getUserID } from "~/lib/auth-server";
 import { RecipeInput } from "../types";
-
-const prisma = new PrismaClient();
+import { Recipe } from "@prisma/client";
+import { prisma } from "~/lib/prisma";
 
 export const getRecipes = createServerFn().handler(async () => {
   const recipes = await prisma.recipe.findMany({
@@ -38,7 +37,7 @@ export const getAuthorRecipes = createServerFn()
       include: { author: true },
     });
     if (!recipes) {
-      throw new Error(`No recipes found for author with ID ${data}`);
+      throw new Error(`No recipes found for author with ID ${data} `);
     }
 
     return recipes;
@@ -103,7 +102,7 @@ export const updateRecipe = createServerFn({ method: "POST" })
         },
       });
       if (!updatedRecipe) {
-        throw new Error(`Failed to update recipe with ID ${id}`);
+        throw new Error(`Failed to update recipe with ID ${id} `);
       }
       return updatedRecipe;
     } catch (error) {
@@ -122,7 +121,7 @@ export const toggleRecipeVisibility = createServerFn({ method: "POST" })
       });
       if (!updatedRecipe) {
         throw new Error(
-          `Failed to update visibility for recipe with ID ${data.id}`,
+          `Failed to update visibility for recipe with ID ${data.id} `,
         );
       }
       return updatedRecipe;
@@ -140,7 +139,7 @@ export const deleteRecipe = createServerFn({ method: "POST" })
         where: { id: data },
       });
       if (!deletedRecipe) {
-        throw new Error(`Failed to delete recipe with ID ${data}`);
+        throw new Error(`Failed to delete recipe with ID ${data} `);
       }
       return { message: "Recipe deleted successfully" };
     } catch (error) {

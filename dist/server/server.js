@@ -1,5 +1,4 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { NullProtoObj } from "rou3";
 import { jsx } from "react/jsx-runtime";
 import { defineHandlerCallback, renderRouterToStream } from "@tanstack/react-router/ssr/server";
 import { RouterProvider } from "@tanstack/react-router";
@@ -2547,6 +2546,11 @@ function getOrigin(request) {
   }
   return "http://localhost";
 }
+const NullProtoObj = /* @__PURE__ */ (() => {
+  const e = function() {
+  };
+  return e.prototype = /* @__PURE__ */ Object.create(null), Object.freeze(e.prototype), e;
+})();
 function splitSetCookieString(cookiesString) {
   if (Array.isArray(cookiesString)) return cookiesString.flatMap((c2) => splitSetCookieString(c2));
   if (typeof cookiesString !== "string") return [];
@@ -3182,7 +3186,7 @@ function getResponse() {
   return event._res;
 }
 async function getStartManifest() {
-  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-DaZ7onpU.js");
+  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-BE6G-_QQ.js");
   const startManifest = tsrStartManifest();
   const rootRoute = startManifest.routes[rootRouteId] = startManifest.routes[rootRouteId] || {};
   rootRoute.assets = rootRoute.assets || [];
@@ -3219,24 +3223,30 @@ async function getStartManifest() {
   };
   return manifest2;
 }
-const manifest = { "1b7fd1f3c31ca466fb0a1353e7f38ad6d9683d3b32c0469025d4e6612b1c3b61": {
-  functionName: "getUserID_createServerFn_handler",
-  importer: () => import("./assets/auth-server-TJijXuL8.js")
-}, "74faf26fd30e3c269bbe0ae3c5b126080793e05d28a6e57dca4b09bf30d6c5c7": {
+const manifest = { "74faf26fd30e3c269bbe0ae3c5b126080793e05d28a6e57dca4b09bf30d6c5c7": {
   functionName: "getRecipes_createServerFn_handler",
-  importer: () => import("./assets/recipe-kHinEFpw.js")
+  importer: () => import("./assets/recipe-CcFp8S2t.js")
 }, "e4bfad61c10d60f438035f7214d8e206941f90e71fc70c4af8ac4422dca76b76": {
   functionName: "getRecipeById_createServerFn_handler",
-  importer: () => import("./assets/recipe-kHinEFpw.js")
+  importer: () => import("./assets/recipe-CcFp8S2t.js")
 }, "593702240603f4780e3a1e2164c3c79a86337f902f701e8d989a3bec40c37670": {
   functionName: "getAuthorRecipes_createServerFn_handler",
-  importer: () => import("./assets/recipe-kHinEFpw.js")
+  importer: () => import("./assets/recipe-CcFp8S2t.js")
 }, "4b98f17c19c7990b1829caaf27f96a57b69d0392d17e02b3eb20272965f2459b": {
   functionName: "createRecipe_createServerFn_handler",
-  importer: () => import("./assets/recipe-kHinEFpw.js")
+  importer: () => import("./assets/recipe-CcFp8S2t.js")
 }, "880a00448ed4cc047ab33669ed8cfe63cc32b202f82024042d71c85f6c5b4efb": {
   functionName: "updateRecipe_createServerFn_handler",
-  importer: () => import("./assets/recipe-kHinEFpw.js")
+  importer: () => import("./assets/recipe-CcFp8S2t.js")
+}, "7d0040cf4946a80c9f79c63d09f5e51717f18a6962c1646a46e2ff0c8de6e966": {
+  functionName: "toggleRecipeVisibility_createServerFn_handler",
+  importer: () => import("./assets/recipe-CcFp8S2t.js")
+}, "2af54a2501ad862b75d32b935b021263103cba8b6a1e2565b7aaac8e6ae007f7": {
+  functionName: "deleteRecipe_createServerFn_handler",
+  importer: () => import("./assets/recipe-CcFp8S2t.js")
+}, "1b7fd1f3c31ca466fb0a1353e7f38ad6d9683d3b32c0469025d4e6612b1c3b61": {
+  functionName: "getUserID_createServerFn_handler",
+  importer: () => import("./assets/auth-server-DOZ0r-Wg.js")
 } };
 async function getServerFnById(id) {
   const serverFnInfo = manifest[id];
@@ -3513,7 +3523,7 @@ function createStartHandler(cb) {
   let routerEntry = null;
   const getEntries = async () => {
     if (routerEntry === null) {
-      routerEntry = await import("./assets/router-J39x_Qz3.js").then((n) => n.r);
+      routerEntry = await import("./assets/router-8Gksb7T5.js").then((n) => n.r);
     }
     if (startEntry === null) {
       startEntry = await import("./assets/start-HYkvq4Ni.js");

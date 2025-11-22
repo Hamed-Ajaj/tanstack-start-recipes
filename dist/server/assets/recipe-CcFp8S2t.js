@@ -1,15 +1,18 @@
 import { a as createServerRpc, c as createServerFn } from "../server.js";
 import { PrismaClient } from "@prisma/client";
-import { g as getUserID } from "./auth-server-CixsgOnm.js";
+import { g as getUserID } from "./auth-server-BTQhBpSc.js";
 import "node:async_hooks";
-import "rou3";
 import "react/jsx-runtime";
 import "@tanstack/react-router/ssr/server";
 import "@tanstack/react-router";
-import "./auth-middleware-C8KKF5TR.js";
+import "./auth-middleware-BYLupTBh.js";
 import "better-auth";
 import "better-auth/react-start";
 import "better-auth/adapters/prisma";
+import "node:process";
+import "node:path";
+import "node:url";
+import "@prisma/client/runtime/library";
 const prisma = new PrismaClient();
 const getRecipes_createServerFn_handler = createServerRpc("74faf26fd30e3c269bbe0ae3c5b126080793e05d28a6e57dca4b09bf30d6c5c7", (opts, signal) => {
   return getRecipes.__executeServer(opts, signal);
@@ -145,10 +148,63 @@ const updateRecipe = createServerFn({
     throw new Error("Failed to update recipe");
   }
 });
+const toggleRecipeVisibility_createServerFn_handler = createServerRpc("7d0040cf4946a80c9f79c63d09f5e51717f18a6962c1646a46e2ff0c8de6e966", (opts, signal) => {
+  return toggleRecipeVisibility.__executeServer(opts, signal);
+});
+const toggleRecipeVisibility = createServerFn({
+  method: "POST"
+}).inputValidator((data) => data).handler(toggleRecipeVisibility_createServerFn_handler, async ({
+  data
+}) => {
+  try {
+    const updatedRecipe = await prisma.recipe.update({
+      where: {
+        id: data.id
+      },
+      data: {
+        isPublic: !data.isPublic
+      }
+    });
+    if (!updatedRecipe) {
+      throw new Error(`Failed to update visibility for recipe with ID ${data.id}`);
+    }
+    return updatedRecipe;
+  } catch (error) {
+    console.error("Error toggling recipe visibility:", error);
+    throw new Error("Failed to toggle recipe visibility");
+  }
+});
+const deleteRecipe_createServerFn_handler = createServerRpc("2af54a2501ad862b75d32b935b021263103cba8b6a1e2565b7aaac8e6ae007f7", (opts, signal) => {
+  return deleteRecipe.__executeServer(opts, signal);
+});
+const deleteRecipe = createServerFn({
+  method: "POST"
+}).inputValidator((id) => id).handler(deleteRecipe_createServerFn_handler, async ({
+  data
+}) => {
+  try {
+    const deletedRecipe = await prisma.recipe.delete({
+      where: {
+        id: data
+      }
+    });
+    if (!deletedRecipe) {
+      throw new Error(`Failed to delete recipe with ID ${data}`);
+    }
+    return {
+      message: "Recipe deleted successfully"
+    };
+  } catch (error) {
+    console.error("Error deleting recipe:", error);
+    throw new Error("Failed to delete recipe");
+  }
+});
 export {
   createRecipe_createServerFn_handler,
+  deleteRecipe_createServerFn_handler,
   getAuthorRecipes_createServerFn_handler,
   getRecipeById_createServerFn_handler,
   getRecipes_createServerFn_handler,
+  toggleRecipeVisibility_createServerFn_handler,
   updateRecipe_createServerFn_handler
 };
