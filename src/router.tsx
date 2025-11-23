@@ -14,7 +14,7 @@ export function getRouter() {
     defaultErrorComponent: DefaultCatchBoundary,
     defaultNotFoundComponent: () => <NotFound />,
     scrollRestoration: true,
-    defaultPendingMinMs: 0,
+    defaultPendingMinMs: 250,
     defaultPendingComponent: () => (
 
       <div className="mx-auto flex mt-8 flex-col items-center justify-center">

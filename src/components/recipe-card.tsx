@@ -8,7 +8,8 @@ import authClient from "~/lib/auth-client";
 import { getIngredientName } from "~/utils/string-utils";
 import { difficultyConfig } from "~/utils/config";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { Recipe } from "~/utils/types";
+import { Recipe } from "generated/prisma/client";
+// import { Recipe } from "~/utils/types";
 
 interface RecipeCardProps {
   recipe: Recipe;

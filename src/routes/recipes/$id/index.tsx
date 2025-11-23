@@ -27,7 +27,7 @@ import authClient from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 import { getUserID } from "~/lib/auth-server";
 import { Suspense } from "react";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
 const getRecipeQueryOptions = (id: string) => queryOptions({
   queryKey: ["recipe", id],
@@ -57,7 +57,7 @@ export const Route = createFileRoute("/recipes/$id/")({
     const { id } = params;
 
     const userID = ctx.userID;
-    ctx.queryClient.prefetchQuery(getRecipeQueryOptions(id));
+    ctx.queryClient.ensureQueryData(getRecipeQueryOptions(id));
     return { userID, id };
   },
 });
@@ -92,12 +92,21 @@ const RecipeDetails = ({ id }: { id: string }) => {
   const router = useRouter();
   const { data: recipe } = useSuspenseQuery(getRecipeQueryOptions(id));
   const { data: session } = authClient.useSession();
+  const queryClient = useQueryClient();
 
   const isAuthor = session?.user.id === recipe.authorId;
-
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteRecipe({ data: id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recipes"] });
+      router.navigate({ to: "/" });
+    },
+    onError: (err) => {
+      console.error("Failed to delete:", err);
+    }
+  });
   const handleDelete = async () => {
-    const response = await deleteRecipe({ data: id });
-    if (response) window.location.href = "/";
+    deleteMutation.mutate(id);
   };
 
   const handleTogglePrivacy = async () => {
@@ -105,6 +114,7 @@ const RecipeDetails = ({ id }: { id: string }) => {
       data: { id, isPublic: recipe.isPublic },
     });
     router.invalidate();
+    queryClient.invalidateQueries({ queryKey: ["recipe", id] });
   };
 
   return (
